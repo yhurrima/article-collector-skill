@@ -1,0 +1,19 @@
+# 敏感配置
+.env
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Claude Code
+.claude/
+
+# 用户本地设置
+*.log
+.DS_Store
