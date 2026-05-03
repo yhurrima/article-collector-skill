@@ -16,9 +16,10 @@ class ReadingStatsDashboardTests(unittest.TestCase):
 
         self.assertIn("我想看我的阅读统计", skill_text)
         self.assertIn("阅读统计", skill_text)
-        self.assertIn("分类饼图", skill_text)
-        self.assertIn("来源柱状图", skill_text)
-        self.assertIn("每天收藏文章数量折线图", skill_text)
+        self.assertIn("分类分布", skill_text)
+        self.assertIn("来源分布", skill_text)
+        self.assertIn("每日收藏文章量", skill_text)
+        self.assertIn("收藏文章总数", skill_text)
 
     def test_builds_expected_dashboard_blocks(self):
         from reading_stats_dashboard import build_reading_stats_blocks
@@ -27,21 +28,26 @@ class ReadingStatsDashboardTests(unittest.TestCase):
 
         self.assertEqual(
             [block["name"] for block in blocks],
-            ["分类分布", "来源分布", "每日收藏趋势"],
+            ["收藏文章总数", "分类分布", "来源分布", "每日收藏文章量"],
         )
-        self.assertEqual([block["type"] for block in blocks], ["pie", "column", "line"])
+        self.assertEqual([block["type"] for block in blocks], ["statistics", "pie", "column", "line"])
 
-        category_config = blocks[0]["data_config"]
+        total_config = blocks[0]["data_config"]
+        self.assertEqual(total_config["table_name"], "文章收藏表")
+        self.assertTrue(total_config["count_all"])
+        self.assertNotIn("group_by", total_config)
+
+        category_config = blocks[1]["data_config"]
         self.assertEqual(category_config["table_name"], "文章收藏表")
         self.assertTrue(category_config["count_all"])
         self.assertEqual(category_config["group_by"][0]["field_name"], "分类")
 
-        source_config = blocks[1]["data_config"]
+        source_config = blocks[2]["data_config"]
         self.assertTrue(source_config["count_all"])
         self.assertEqual(source_config["group_by"][0]["field_name"], "来源")
         self.assertEqual(source_config["group_by"][0]["sort"], {"type": "value", "order": "desc"})
 
-        daily_config = blocks[2]["data_config"]
+        daily_config = blocks[3]["data_config"]
         self.assertTrue(daily_config["count_all"])
         self.assertEqual(daily_config["group_by"][0]["field_name"], "保存日期")
         self.assertEqual(daily_config["group_by"][0]["sort"], {"type": "group", "order": "asc"})
@@ -69,9 +75,10 @@ class ReadingStatsDashboardTests(unittest.TestCase):
             if command == "+dashboard-block-list":
                 return {
                     "items": [
+                        {"block_id": "cht_0", "name": "收藏文章总数", "type": "statistics"},
                         {"block_id": "cht_1", "name": "分类分布", "type": "pie"},
                         {"block_id": "cht_2", "name": "来源分布", "type": "column"},
-                        {"block_id": "cht_3", "name": "每日收藏趋势", "type": "line"},
+                        {"block_id": "cht_3", "name": "每日收藏文章量", "type": "line"},
                     ]
                 }
             raise AssertionError(f"unexpected command: {args}")
