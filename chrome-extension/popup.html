@@ -54,6 +54,8 @@
       border-radius: 8px;
       font-size: 13px;
       display: none;
+      white-space: pre-wrap;
+      word-break: break-all;
     }
     .status.success {
       display: block;
@@ -84,7 +86,7 @@
   <button class="btn btn-primary" id="saveBtn">收藏到飞书</button>
 
   <div class="status" id="status"></div>
-  <div class="hint">点击后将自动处理内容并写入飞书</div>
+  <div class="hint">点击后发送链接到队列服务，自动完成收藏</div>
 
   <script src="popup.js"></script>
 </body>
