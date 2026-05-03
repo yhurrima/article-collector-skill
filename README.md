@@ -273,6 +273,27 @@ Chrome 安装步骤:
 收藏这篇文章，这是文章链接：https://example.com/article
 ```
 
+### 5. 查看阅读统计
+
+用户可以对 Agent 说:
+
+```text
+我想看我的阅读统计
+```
+
+Agent 会创建或复用飞书多维表格里的 `阅读统计` 仪表盘，并返回仪表盘链接。仪表盘包含:
+
+- 分类饼图：按 `分类` 统计文章数量。
+- 来源柱状图：按 `来源` 统计文章数量。
+- 每天收藏文章数量折线图：按 `保存日期` 统计每日收藏数量。
+- 时间范围筛选：基于 `保存日期` 在飞书仪表盘中筛选一段时间内的数据。
+
+也可以手动运行:
+
+```bash
+python3 backend/reading_stats_dashboard.py
+```
+
 ## 影响范围:
 
 ### 主要文件
@@ -283,6 +304,7 @@ backend/queue_server.py     # 浏览器插件 POST 入口
 backend/auto_process.py     # 收藏处理、API 摘要、飞书写入
 backend/extractor.py        # 网页抓取、正文清洗、API 调用
 backend/daily_summary.py    # 每日汇总、失败文章重试、飞书文档生成
+backend/reading_stats_dashboard.py # 阅读统计仪表盘创建和复用
 backend/user_settings.py    # 用户设置读取和保存
 chrome-extension/           # Chrome 插件
 tests/test_daily_summary.py # 回归测试
