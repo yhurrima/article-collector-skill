@@ -316,6 +316,20 @@ lark-cli base +record-list --base-token $FEISHU_BASE_APP_TOKEN --table-id $FEISH
 - 关键词 (text)
 - 主要内容 (text)
 - 保存日期 (text)
+- 处理状态 (select: 待处理/完成/处理失败)
+
+### 创建 select 字段的正确方式
+`+field-create` 不支持内联选项，必须分两步：先创建字段，再用 `+field-update` 添加选项。
+
+```bash
+# 第一步：创建字段（不带选项）
+lark-cli base +field-create --base-token $FEISHU_BASE_APP_TOKEN --table-id $FEISHU_ARTICLES_TABLE_ID --json '{"name":"分类","type":"single_select"}'
+lark-cli base +field-create --base-token $FEISHU_BASE_APP_TOKEN --table-id $FEISHU_ARTICLES_TABLE_ID --json '{"name":"处理状态","type":"single_select"}'
+
+# 第二步：用 +field-update 添加选项（注意：options 在顶层，不是 property.options）
+lark-cli base +field-update --base-token $FEISHU_BASE_APP_TOKEN --table-id $FEISHU_ARTICLES_TABLE_ID --field-id "分类" --json '{"name":"分类","type":"single_select","options":[{"name":"技术"},{"name":"产品"},{"name":"设计"},{"name":"商业"},{"name":"AI"},{"name":"其他"}]}'
+lark-cli base +field-update --base-token $FEISHU_BASE_APP_TOKEN --table-id $FEISHU_ARTICLES_TABLE_ID --field-id "处理状态" --json '{"name":"处理状态","type":"single_select","options":[{"name":"待处理"},{"name":"完成"},{"name":"处理失败"}]}'
+```
 
 ## 浏览器插件 (可选)
 chrome-extension/ 文件夹提供了浏览器插件。
