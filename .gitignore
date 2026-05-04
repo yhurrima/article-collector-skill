@@ -2,6 +2,10 @@
 .env
 backend/.env
 
+# 开发笔记（本地保留，不上传）
+memory.md
+AGENTS.md
+
 # Python
 __pycache__/
 *.pyc
