@@ -162,7 +162,7 @@ MIT
 - Project: `2026-05-01-article-collector-skill`
 - Scripts:
   - `run.sh`: 加载 .env
-  - `setup.sh`: --- launchd auto-start setup ---
+  - `setup.sh`: Python 3.12+ (PEP 668) 不允许直接 pip install，用 --user 或 --break-system-packages
 - Commands:
   - `bash run.sh`
   - `bash setup.sh`

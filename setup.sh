@@ -10,7 +10,17 @@ echo "======================="
 
 echo ""
 echo "Installing Python dependencies..."
-pip3 install -r "$SCRIPT_DIR/requirements.txt"
+# Python 3.12+ (PEP 668) 不允许直接 pip install，用 --user 或 --break-system-packages
+if pip3 install -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null; then
+    :
+elif pip3 install --user -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null; then
+    :
+elif pip3 install --break-system-packages -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null; then
+    :
+else
+    echo "Warning: pip install failed. Dependencies may need manual installation."
+    echo "Try: pip3 install --user -r requirements.txt"
+fi
 
 echo ""
 if command -v lark-cli >/dev/null 2>&1; then
@@ -37,6 +47,22 @@ if [[ ! $REPLY =~ ^[Nn]$ ]]; then
     mkdir -p "$HOME/Library/LaunchAgents"
     mkdir -p "$HOME/.article-collector"
 
+    # 检测工具实际路径，构建 launchd 需要的 PATH
+    PYTHON_BIN="$(command -v python3 2>/dev/null || echo /usr/bin/python3)"
+    LARK_BIN="$(command -v lark-cli 2>/dev/null || echo /usr/local/bin/lark-cli)"
+    PYTHON_DIR="$(dirname "$PYTHON_BIN")"
+    LARK_DIR="$(dirname "$LARK_BIN")"
+
+    # 去重并构建 PATH
+    LAUNCH_PATH="$PYTHON_DIR:$LARK_DIR:/usr/bin:/bin"
+    # 补充常见 Homebrew 路径（如果不在已有路径中）
+    for d in /opt/homebrew/bin /usr/local/bin; do
+        case ":$LAUNCH_PATH:" in
+            *":$d:"*) ;;  # 已存在
+            *) LAUNCH_PATH="$d:$LAUNCH_PATH" ;;
+        esac
+    done
+
     cat > "$PLIST_PATH" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -49,6 +75,11 @@ if [[ ! $REPLY =~ ^[Nn]$ ]]; then
         <string>/bin/bash</string>
         <string>${SCRIPT_DIR}/run.sh</string>
     </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>${LAUNCH_PATH}</string>
+    </dict>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
@@ -62,6 +93,11 @@ if [[ ! $REPLY =~ ^[Nn]$ ]]; then
 </dict>
 </plist>
 PLIST
+
+    echo "Detected paths:"
+    echo "  python3: $PYTHON_BIN"
+    echo "  lark-cli: $LARK_BIN"
+    echo "  launchd PATH: $LAUNCH_PATH"
 
     # Unload if already loaded, then load fresh
     launchctl unload "$PLIST_PATH" 2>/dev/null || true
