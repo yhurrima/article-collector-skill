@@ -8,6 +8,8 @@ from user_settings import normalize_settings
 
 LAUNCHD_LABEL = "com.article-collector.daily-summary"
 LAUNCHD_PLIST_PATH = Path.home() / "Library" / "LaunchAgents" / f"{LAUNCHD_LABEL}.plist"
+LAUNCHD_QUEUE_LABEL = "com.article-collector.queue-server"
+LAUNCHD_QUEUE_PLIST_PATH = Path.home() / "Library" / "LaunchAgents" / f"{LAUNCHD_QUEUE_LABEL}.plist"
 MACOS_PROTECTED_DIRS = {"Desktop", "Documents", "Downloads"}
 
 
@@ -117,3 +119,22 @@ def is_macos_protected_path(path):
         resolved_parts[1] == "Users"
         and resolved_parts[3] in MACOS_PROTECTED_DIRS
     )
+
+
+def build_queue_server_plist(project_root, python_executable="python3", environment_path=None):
+    """Build a launchd plist for the queue server (always-on HTTP listener)."""
+    script = Path(project_root) / "backend" / "queue_server.py"
+    plist = {
+        "Label": LAUNCHD_QUEUE_LABEL,
+        "ProgramArguments": [python_executable, str(script)],
+        "RunAtLoad": True,
+        "KeepAlive": True,
+        "WorkingDirectory": str(project_root),
+        "StandardOutPath": "/tmp/article-collector-queue-server.out.log",
+        "StandardErrorPath": "/tmp/article-collector-queue-server.err.log",
+    }
+    if environment_path:
+        plist["EnvironmentVariables"] = {
+            "PATH": environment_path,
+        }
+    return plistlib.dumps(plist, sort_keys=False).decode("utf-8")
