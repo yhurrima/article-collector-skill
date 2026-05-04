@@ -114,8 +114,8 @@ cd ~/.claude/skills/article-collector && ./run.sh
 
 必须提醒用户（使用方式）：
 - 浏览网页时点击插件 → 链接自动保存到飞书多维表格（从 `backend/.env` 读取 `FEISHU_BASE_APP_TOKEN`，拼接链接 `https://my.feishu.cn/base/<FEISHU_BASE_APP_TOKEN>` 并展示给用户）
-- 如果你不用浏览器插件，也可以直接对我说：”帮我收藏这个文章，这是链接”
-- 想看汇总时说：”发送我今天的阅读汇总”
+- 如果你不用浏览器插件，也可以直接对我说：”收藏这篇文章，链接是 <url>”
+- 想看汇总时说：”发送今天的阅读汇总”
 - 想看统计时说：”我想看我的阅读统计”
 - 随时可以修改设置，例如：”改成详细模式”、”改成每天晚上9点发送”
 
@@ -175,11 +175,12 @@ openclaw cron add \
                                     读取表格 → 生成飞书文档 → 机器人推送(概览+文档链接)
 ```
 
-## 命令
+## 使用方式
 
-### /save [url]
-收藏文章。用法：
-- `/save <url>` — 直接收藏指定链接
+### 收藏文章
+对 Agent 说：
+- "收藏这篇文章，链接是 <url>"
+- "帮我保存这个网页：<url>"
 - 浏览器插件点击收藏时，会 POST 当前页面 URL 到本地 `http://127.0.0.1:5679/queue`，由 `backend/queue_server.py` 自动触发处理。
 
 收藏处理步骤：
@@ -240,8 +241,10 @@ elif sys.argv[2]:
 " "$FEISHU_IM_USER_ID" "$FEISHU_IM_CHAT_ID"
 ```
 
-### /daily-summary
-生成今日阅读汇总：
+### 生成每日汇总
+对 Agent 说：
+- "发送今天的阅读汇总"
+- "生成今日阅读报告"
 
 1. **读取今天的文章**（从 config.py 读取 FEISHU_BASE_APP_TOKEN 和 FEISHU_ARTICLES_TABLE_ID）:
 ```bash
@@ -261,8 +264,10 @@ lark-cli docs +create --title "YYYY-MM-DD 阅读汇总" --markdown "文档内容
    - 今日文章列表: 每个标题可点击跳转原文
    - 文档链接: 查看完整汇总
 
-### /weekly-summary
-每周统计，推送仪表盘链接：
+### 生成每周统计
+对 Agent 说：
+- "发送本周阅读统计"
+- "生成每周汇总"
 
 1. 读取本周所有文章
 2. 统计：总阅读量、分类分布、高频标签、主要来源
@@ -270,8 +275,12 @@ lark-cli docs +create --title "YYYY-MM-DD 阅读汇总" --markdown "文档内容
 
 仪表盘: 在飞书中打开多维表格后点击"仪表盘"标签页即可查看
 
-### /reading-stats
-当用户说”我想看我的阅读统计”、”打开阅读统计”或”查看阅读仪表盘”时，创建或复用名为”阅读统计”的飞书多维表格仪表盘，通过飞书 IM 推送摘要统计 + 仪表盘链接给用户。
+### 查看阅读统计
+对 Agent 说：
+- “我想看我的阅读统计”
+- “打开阅读仪表盘”
+- “查看最近一周的阅读统计”
+- “4月份的阅读统计”
 
 支持时间筛选：用户可以说”看最近一周的阅读统计”或”4月份的阅读统计”，Agent 根据用户指定的时间范围传入 `--start-date` 和 `--end-date`。不指定时间时默认最近 30 天。
 
@@ -303,8 +312,10 @@ IM 推送内容：
 - 创建或补齐组件后，返回 `dashboard_url` 给用户。
 - 如果缺少 `FEISHU_BASE_APP_TOKEN` 或 `FEISHU_ARTICLES_TABLE_ID`，明确提示用户先完成飞书配置。
 
-### /list-articles
-列出最近收藏的文章（从 config.py 读取 FEISHU_BASE_APP_TOKEN 和 FEISHU_ARTICLES_TABLE_ID）：
+### 列出最近收藏
+对 Agent 说：
+- "列出最近收藏的文章"
+- "显示我最近保存的文章"
 ```bash
 lark-cli base +record-list --base-token $FEISHU_BASE_APP_TOKEN --table-id $FEISHU_ARTICLES_TABLE_ID --limit 20
 ```
@@ -353,4 +364,4 @@ chrome-extension/ 文件夹提供了浏览器插件。
 3. 点击插件 → 自动将当前页面 URL 发送到 `http://127.0.0.1:5679/queue`
 4. 后端自动抓取、调用 API 摘要、写入飞书表格并发送确认消息
 
-不装插件也可以直接用 `/save <url>` 收藏。
+不装插件也可以直接说"收藏这篇文章，链接是 xxx"。

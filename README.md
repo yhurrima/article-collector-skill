@@ -159,7 +159,7 @@ MIT
 
 ## Auto-generated Project Map
 
-- Project: `2026-05-01-article-collector-skill`
+- Project: `article-collector`
 - Scripts:
   - `run.sh`: 加载 .env
   - `setup.sh`: Python 3.12+ (PEP 668) 不允许直接 pip install，用 --user 或 --break-system-packages
