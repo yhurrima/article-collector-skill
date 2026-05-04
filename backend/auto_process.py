@@ -162,20 +162,29 @@ def extract_basic(title, text, url, meta):
 
 def write_to_feishu(info, url):
     """写入飞书多维表格"""
-    today = datetime.now().strftime("%Y-%m-%d")
+    today_ts = int(datetime.now().timestamp() * 1000)  # 飞书日期字段需要毫秒时间戳
     short_content = "\n".join(f"{i+1}. {p}" for i, p in enumerate(info.get("main_points", [])))
+
+    # 发布日期：如果有日期字符串，转换为时间戳
+    pub_date_ts = ""
+    if info.get("publish_date"):
+        try:
+            pub_date_ts = int(datetime.strptime(info["publish_date"], "%Y-%m-%d").timestamp() * 1000)
+        except:
+            pub_date_ts = ""
+
     fields = {
         "标题": info["title"],
         "原文链接": url,
         "作者": info.get("author", ""),
         "来源": info.get("source", ""),
-        "发布日期": info.get("publish_date", ""),
+        "发布日期": pub_date_ts,
         "分类": info.get("category", "其他"),
         "摘要": info.get("summary", ""),
         "关键词": ", ".join(info.get("tags", [])),
         "主要内容": short_content,
         "处理状态": "完成",
-        "保存日期": today,
+        "保存日期": today_ts,
     }
     payload = json.dumps({
         "fields": list(fields.keys()),
@@ -191,14 +200,14 @@ def write_to_feishu(info, url):
 
 def write_failed_to_feishu(url, error_message):
     """保存处理失败的链接，供每日汇总前重试。"""
-    today = datetime.now().strftime("%Y-%m-%d")
+    today_ts = int(datetime.now().timestamp() * 1000)
     fields = {
         "标题": url,
         "原文链接": url,
         "摘要": "",
         "主要内容": "",
         "处理状态": "处理失败",
-        "保存日期": today,
+        "保存日期": today_ts,
     }
     payload = json.dumps({
         "fields": list(fields.keys()),
@@ -214,14 +223,14 @@ def write_failed_to_feishu(url, error_message):
 
 def write_link_only_to_feishu(url):
     """只保存链接，不抓取正文、不调用模型 API。"""
-    today = datetime.now().strftime("%Y-%m-%d")
+    today_ts = int(datetime.now().timestamp() * 1000)
     fields = {
         "标题": url,
         "原文链接": url,
         "摘要": "",
         "主要内容": "",
         "处理状态": "待处理",
-        "保存日期": today,
+        "保存日期": today_ts,
     }
     payload = json.dumps({
         "fields": list(fields.keys()),

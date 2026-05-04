@@ -331,8 +331,15 @@ lark-cli base +record-list --base-token $FEISHU_BASE_APP_TOKEN --table-id $FEISH
 - 摘要 (text)
 - 关键词 (text)
 - 主要内容 (text)
-- 保存日期 (text)
+- 保存日期 (date)
 - 处理状态 (select: 待处理/完成/处理失败)
+
+### 日期字段说明
+飞书日期字段使用毫秒时间戳格式（Unix timestamp in milliseconds）。写入时需转换为毫秒时间戳：
+```python
+from datetime import datetime
+ts = int(datetime.now().timestamp() * 1000)
+```
 
 ### 创建 select 字段的正确方式
 `+field-create` 不支持内联选项，必须分两步：先创建字段，再用 `+field-update` 添加选项。
