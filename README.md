@@ -46,10 +46,22 @@ git clone https://github.com/yhurrima/article-collector-skill.git ~/skills/artic
 cd ~/skills/article-collector && ./setup.sh
 ```
 
+### 手动安装
+
+```bash
+git clone https://github.com/yhurrima/article-collector-skill.git /path/to/article-collector
+cd /path/to/article-collector
+pip3 install -r requirements.txt
+cp backend/.env.example backend/.env
+# 编辑 backend/.env 填入配置
+./run.sh
+```
+
 安装脚本会:
 - 安装 Python 依赖
 - 检查 `lark-cli` 是否可用
 - 从 `backend/.env.example` 创建配置文件
+- 询问是否启用队列服务开机自启（macOS launchd）
 
 ## 使用方式
 
@@ -112,6 +124,7 @@ Agent 会通过飞书 IM 推送统计摘要和仪表盘链接，仪表盘包含:
 - [lark-cli](https://github.com/nicholasxuu/lark-cli)（飞书命令行工具）
 - 飞书机器人应用（具备多维表格、云文档、即时消息权限）
 - 模型 API（可选，用于 AI 自动摘要；没有 API 时可以用 Agent 原生能力手动处理）
+- IM 推送: 在 `backend/.env` 中设置 `FEISHU_IM_USER_ID`（私信）或 `FEISHU_IM_CHAT_ID`（群聊）
 
 ## 工作流程
 
@@ -149,6 +162,7 @@ MIT
 - Project: `2026-05-01-article-collector-skill`
 - Scripts:
   - `run.sh`: 加载 .env
+  - `setup.sh`: --- launchd auto-start setup ---
 - Commands:
   - `bash run.sh`
   - `bash setup.sh`

@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from user_settings import load_settings
 from config import (
     FEISHU_BASE_APP_TOKEN, FEISHU_ARTICLES_TABLE_ID, FEISHU_IM_CHAT_ID,
-    AI_API_KEY,
+    AI_API_KEY, FEISHU_IM_USER_ID,
 )
 
 
@@ -251,10 +251,17 @@ def send_im(info, url):
 
 [查看原文]({url})"""
 
-    _run_lark("im", "+messages-send",
-              "--as", "bot",
-              "--chat-id", FEISHU_IM_CHAT_ID,
-              "--markdown", msg)
+    # 优先私信推送，其次群聊
+    if FEISHU_IM_USER_ID:
+        _run_lark("im", "+messages-send",
+                  "--as", "bot",
+                  "--user-id", FEISHU_IM_USER_ID,
+                  "--markdown", msg)
+    elif FEISHU_IM_CHAT_ID:
+        _run_lark("im", "+messages-send",
+                  "--as", "bot",
+                  "--chat-id", FEISHU_IM_CHAT_ID,
+                  "--markdown", msg)
 
 
 def try_ai_extract(title, text, url):
@@ -274,6 +281,8 @@ def process(url):
     if settings.get("processingMode") == "link_only" or not AI_API_KEY:
         ok = write_link_only_to_feishu(url)
         print(f"Feishu link-only: {'ok' if ok else 'failed'}")
+        # link_only 模式也要发 IM 确认
+        send_im({"title": url, "source": "", "category": "", "summary": "链接已保存，待后续处理"}, url)
         return {
             "title": url,
             "url": url,

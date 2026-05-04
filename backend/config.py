@@ -28,3 +28,4 @@ SERVER_PORT = 5678
 
 # IM 推送目标 (群聊 ID 或用户 ID)
 FEISHU_IM_CHAT_ID = os.environ.get("FEISHU_IM_CHAT_ID", "")
+FEISHU_IM_USER_ID = os.environ.get("FEISHU_IM_USER_ID", "")
