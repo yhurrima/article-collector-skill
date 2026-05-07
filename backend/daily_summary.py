@@ -164,7 +164,10 @@ def get_today_articles(date_str=None):
         record = dict(zip(fields_list, row))
         if index < len(record_ids):
             record["record_id"] = record_ids[index]
-        if record.get("保存日期") == today:
+        saved_date = record.get("保存日期", "")
+        if isinstance(saved_date, str):
+            saved_date = saved_date[:10]
+        if str(saved_date) == today:
             today_articles.append(record)
     return today_articles
 
@@ -270,6 +273,9 @@ def run(date_str=None):
     articles = get_today_articles(report_date)
     if not articles:
         print(f"{report_date} 没有收藏的文章")
+        if FEISHU_IM_CHAT_ID:
+            send_markdown(FEISHU_IM_CHAT_ID, f"**📰 {report_date} 阅读汇总**\n\n昨天没有收藏文章。")
+            print("IM 推送完成（无文章提醒）")
         return
     articles = complete_incomplete_articles(articles)
 
