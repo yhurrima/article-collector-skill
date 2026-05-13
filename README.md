@@ -65,7 +65,7 @@ cp backend/.env.example backend/.env
 
 ## 使用方式
 
-### 收藏文章
+### 1. 收藏文章
 
 **浏览器插件（推荐）:** 安装插件后，浏览任意文章页面，点击插件图标即可收藏。
 
@@ -76,7 +76,7 @@ cp backend/.env.example backend/.env
 ```
 
 
-### 查看阅读汇总
+### 2. 查看阅读汇总
 
 **自动推送:** 设置好定时推送后，每天会自动生成飞书文档并推送消息，不用手动操作。
 
@@ -91,7 +91,7 @@ Agent 会生成飞书文档并推送消息，包含:
 - 每篇文章的摘要和主要观点
 - 原文链接
 
-### 查看阅读统计
+### 3. 查看阅读统计
 
 对 Agent 说:
 
@@ -109,7 +109,7 @@ Agent 会通过飞书 IM 推送统计摘要和仪表盘链接，仪表盘包含:
 
 支持时间筛选，在飞书仪表盘中可以按 `保存日期` 筛选任意时间段。
 
-### 修改设置
+### 4. 修改设置
 
 所有设置都可以通过对话随时修改:
 
@@ -117,6 +117,23 @@ Agent 会通过飞书 IM 推送统计摘要和仪表盘链接，仪表盘包含:
 - "改成详细模式"
 - "让总结短一点"
 - "显示我当前的设置"
+
+## 平台兼容性
+
+定时发送阅读汇总的能力取决于运行环境：
+
+| 平台 | 有 API | 无 API |
+|---|---|---|
+| **OpenClaw**（持久化 Agent 平台） | ✅ 全平台支持（Mac/Windows/Linux），通过 `openclaw cron` 调度 | ✅ 平台唤醒 Agent 补全文章并发送 |
+| **macOS**（本地 CLI） | ✅ 通过 `launchd` LaunchAgent 定时执行 | ❌ 只能手动触发 |
+| **Windows**（本地 CLI） | ❌ 暂不支持定时安装 | ❌ 只能手动触发 |
+| **Linux**（本地 CLI） | ❌ 暂不支持定时安装 | ❌ 只能手动触发 |
+
+- **OpenClaw** 平台不区分操作系统，定时能力由平台提供，Mac/Windows/Linux 均可使用。
+- **本地 CLI 环境**下，定时依赖操作系统的原生调度机制。目前仅实现了 macOS `launchd`，Windows Task Scheduler 和 Linux systemd/cron 暂未支持。
+- 无 API + 非持久化平台下，系统定时任务无法唤醒 Agent 调用原生 LLM 能力，因此只能手动触发。
+
+手动触发方式：对 Agent 说"发送我今天的阅读汇总"或运行 `python3 backend/daily_summary.py --today`。
 
 ## 前置依赖
 
@@ -159,7 +176,7 @@ MIT
 
 ## Auto-generated Project Map
 
-- Project: `article-collector`
+- Project: `2026-05-01-article-collector-skill`
 - Scripts:
   - `run.sh`: 加载 .env
   - `setup.sh`: Python 3.12+ (PEP 668) 不允许直接 pip install，用 --user 或 --break-system-packages
