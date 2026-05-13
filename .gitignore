@@ -1,10 +1,14 @@
 # 敏感配置
 .env
 backend/.env
+*.key
+*.pem
 
 # 开发笔记（本地保留，不上传）
 memory.md
 AGENTS.md
+*.local.md
+*.draft.md
 
 # Python
 __pycache__/
